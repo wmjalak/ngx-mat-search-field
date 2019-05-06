@@ -1,0 +1,170 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "search-field-lib": {
+      "root": "projects/search-field-lib",
+      "sourceRoot": "projects/search-field-lib/src",
+      "projectType": "library",
+      "prefix": "ngx",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/search-field-lib/tsconfig.lib.json",
+            "project": "projects/search-field-lib/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/search-field-lib/src/test.ts",
+            "tsConfig": "projects/search-field-lib/tsconfig.spec.json",
+            "karmaConfig": "projects/search-field-lib/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/search-field-lib/tsconfig.lib.json",
+              "projects/search-field-lib/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "search-field-tester": {
+      "root": "projects/search-field-tester/",
+      "sourceRoot": "projects/search-field-tester/src",
+      "projectType": "application",
+      "prefix": "app",
+      "schematics": {},
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/search-field-tester",
+            "index": "projects/search-field-tester/src/index.html",
+            "main": "projects/search-field-tester/src/main.ts",
+            "polyfills": "projects/search-field-tester/src/polyfills.ts",
+            "tsConfig": "projects/search-field-tester/tsconfig.app.json",
+            "assets": [
+              "projects/search-field-tester/src/favicon.ico",
+              "projects/search-field-tester/src/assets"
+            ],
+            "styles": [
+              "projects/search-field-tester/src/styles.css"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/search-field-tester/src/environments/environment.ts",
+                  "with": "projects/search-field-tester/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "search-field-tester:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "search-field-tester:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "search-field-tester:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/search-field-tester/src/test.ts",
+            "polyfills": "projects/search-field-tester/src/polyfills.ts",
+            "tsConfig": "projects/search-field-tester/tsconfig.spec.json",
+            "karmaConfig": "projects/search-field-tester/karma.conf.js",
+            "styles": [
+              "projects/search-field-tester/src/styles.css"
+            ],
+            "scripts": [],
+            "assets": [
+              "projects/search-field-tester/src/favicon.ico",
+              "projects/search-field-tester/src/assets"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/search-field-tester/tsconfig.app.json",
+              "projects/search-field-tester/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "search-field-tester-e2e": {
+      "root": "projects/search-field-tester-e2e/",
+      "projectType": "application",
+      "prefix": "",
+      "architect": {
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "projects/search-field-tester-e2e/protractor.conf.js",
+            "devServerTarget": "search-field-tester:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "search-field-tester:serve:production"
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": "projects/search-field-tester-e2e/tsconfig.e2e.json",
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "search-field-lib"
+}

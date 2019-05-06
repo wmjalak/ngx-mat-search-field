@@ -1,0 +1,12 @@
+<div class="container">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-form-field>
+      <ngx-mat-search-field
+        name="user-search"
+        placeholder="User"
+        formControlName="user"
+        prefetch="true"
+      ></ngx-mat-search-field>
+    </mat-form-field>
+  </form>
+</div>
