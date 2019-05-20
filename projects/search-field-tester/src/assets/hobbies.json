@@ -1,0 +1,70 @@
+[
+  {
+    "id": 1,
+    "name": "Badmington"
+  },
+  {
+    "id": 2,
+    "name": "Billiards"
+  },
+  {
+    "id": 3,
+    "name": "Bowling"
+  },
+  {
+    "id": 4,
+    "name": "Boxing"
+  },
+  {
+    "id": 5,
+    "name": "Bridge"
+  },
+  {
+    "id": 6,
+    "name": "Chess"
+  },
+  {
+    "id": 7,
+    "name": "Curling"
+  },
+  {
+    "id": 8,
+    "name": "Darts"
+  },
+  {
+    "id": 9,
+    "name": "Fencing"
+  },
+  {
+    "id": 10,
+    "name": "Gymnastics"
+  },
+  {
+    "id": 11,
+    "name": "Judo"
+  },
+  {
+    "id": 12,
+    "name": "Longboarding"
+  },
+  {
+    "id": 13,
+    "name": "Poker"
+  },
+  {
+    "id": 14,
+    "name": "Table tennis"
+  },
+  {
+    "id": 15,
+    "name": "Volleyball"
+  },
+  {
+    "id": 16,
+    "name": "Weightlifting"
+  },
+  {
+    "id": 17,
+    "name": "Wrestling"
+  }
+]

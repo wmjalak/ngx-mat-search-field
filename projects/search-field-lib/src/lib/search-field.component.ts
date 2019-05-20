@@ -21,11 +21,10 @@ import {
   ControlValueAccessor,
   NgControl
 } from '@angular/forms';
-import { Observable, of, merge, empty, Subject, fromEvent, pipe } from 'rxjs';
+import { Observable, of, Subject, fromEvent } from 'rxjs';
 import {
   startWith,
   debounceTime,
-  defaultIfEmpty,
   finalize,
   map,
   switchMap,
@@ -139,8 +138,10 @@ export class SearchFieldComponent
   }
 
   set focused(_focused: boolean) {
-    if (_focused && this.prefetch === 'false') {
-      this.autoCompleteControl.updateValueAndValidity();
+    if (_focused) {
+      if (this.prefetch === 'false') {
+        this.autoCompleteControl.updateValueAndValidity();
+      }
       this.autocompleteScroll(); // https://github.com/angular/components/issues/13650
     }
     this._focused = _focused;
@@ -239,15 +240,15 @@ export class SearchFieldComponent
       .pipe(finalize(() => (this.isLoading = false)));
   }
 
-  ngOnInit() {
-    this.initializeInputControl();
-  }
+  ngOnInit() {}
 
   ngOnDestroy() {
     this.stateChanges.complete();
   }
 
-  ngAfterViewInit() {}
+  ngAfterViewInit() {
+    this.initializeInputControl();
+  }
 
   initializeInputControl() {
     this.autoCompleteControl.valueChanges
@@ -312,20 +313,25 @@ export class SearchFieldComponent
         fromEvent(this.autocompleteRef.panel.nativeElement, 'scroll')
           .pipe(
             map(x => this.autocompleteRef.panel.nativeElement.scrollTop),
-            takeUntil(this.autocompleteTrigger.panelClosingActions)
-          )
-          .subscribe((x: number) => {
-            const scrollTop = this.autocompleteRef.panel.nativeElement.scrollTop;
-            const scrollHeight = this.autocompleteRef.panel.nativeElement.scrollHeight;
-            const elementHeight = this.autocompleteRef.panel.nativeElement.clientHeight;
-            const atBottom = scrollHeight <= scrollTop + elementHeight;
+            takeUntil(this.autocompleteTrigger.panelClosingActions),
+            switchMap((x: number) => {
+              const scrollTop = this.autocompleteRef.panel.nativeElement.scrollTop;
+              const scrollHeight = this.autocompleteRef.panel.nativeElement.scrollHeight;
+              const elementHeight = this.autocompleteRef.panel.nativeElement.clientHeight;
+              const atBottom = scrollHeight <= scrollTop + elementHeight;
 
-            if (atBottom) {
-              // reached the bottom
-              this.skipIndex++; // increase skipping index
-              this.getSearchFieldItems().subscribe((fieldItems: SearchFieldItem[]) => {
-                this.items = [...this.items, ...fieldItems]; // add more items to the list
-              });
+              if (atBottom) {
+                // reached the bottom
+                this.skipIndex++; // increase skipping index
+                return this.getSearchFieldItems();
+              } else {
+                return of(undefined);
+              }
+            })
+          )
+          .subscribe((fieldItems: SearchFieldItem[]) => {
+            if (fieldItems) {
+              this.items = [...this.items, ...fieldItems]; // add more items to the list
             }
           });
       }

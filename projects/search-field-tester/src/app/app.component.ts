@@ -11,7 +11,8 @@ export class AppComponent {
 
   constructor(formBuilder: FormBuilder) {
     this.form = formBuilder.group({
-      user: ''
+      user: '',
+      hobby: ''
     });
   }
 

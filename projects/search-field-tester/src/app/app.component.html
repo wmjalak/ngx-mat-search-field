@@ -1,23 +1,21 @@
 <div class="container">
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
-      <mat-form-field>
-          <ngx-mat-search-field
-            name="user-search"
-            placeholder="User (prefetch=true)"
-            formControlName="user"
-            prefetch="true"
-          ></ngx-mat-search-field>
-        </mat-form-field>
-
     <mat-form-field>
       <ngx-mat-search-field
         name="user-search"
-        placeholder="User (prefetch=false)"
+        placeholder="User (prefetch=true)"
         formControlName="user"
-        prefetch="false"
+        prefetch="true"
       ></ngx-mat-search-field>
     </mat-form-field>
 
+    <mat-form-field>
+      <ngx-mat-search-field
+        name="hobby-search"
+        placeholder="Hobby (prefetch=false)"
+        formControlName="hobby"
+        prefetch="false"
+      ></ngx-mat-search-field>
+    </mat-form-field>
   </form>
 </div>

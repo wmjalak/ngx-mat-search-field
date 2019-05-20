@@ -6,6 +6,12 @@ Angular component providing an input field for searching.
 
 ## Getting started
 
+## Properties
+
+| Name  | Description |
+| :---- | :---------- |
+| `prefetch` | When `true` the data is prefetched. When `false` the data is fetched when field gets focused. |
+
 ## Development
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.7.1.
