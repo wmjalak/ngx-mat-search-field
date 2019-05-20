@@ -8,7 +8,9 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "build-lib": "ng build search-field-lib"
+    "build-lib": "ng build search-field-lib",
+    "npm-pack": "cd dist/search-field-lib && npm pack",
+    "package": "npm run build-lib && npm run npm-pack"
   },
   "private": true,
   "dependencies": {

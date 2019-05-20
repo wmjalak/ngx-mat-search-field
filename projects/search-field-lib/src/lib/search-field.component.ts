@@ -21,17 +21,28 @@ import {
   ControlValueAccessor,
   NgControl
 } from '@angular/forms';
-import { Observable, of, Subject, fromEvent } from 'rxjs';
-import { startWith, debounceTime, finalize, map, switchMap, takeUntil } from 'rxjs/operators';
+import { Observable, of, merge, empty, Subject, fromEvent, pipe } from 'rxjs';
+import {
+  startWith,
+  debounceTime,
+  defaultIfEmpty,
+  finalize,
+  map,
+  switchMap,
+  takeUntil
+} from 'rxjs/operators';
 
 import { SearchFieldService } from './search-field.service';
 import { SearchFieldItem } from './search-field-item';
-import { MatAutocompleteSelectedEvent } from '@angular/material';
+import {
+  MatAutocomplete,
+  MatAutocompleteSelectedEvent,
+  MatAutocompleteTrigger
+} from '@angular/material/autocomplete';
 import { MatFormFieldControl } from '@angular/material';
-import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material';
 
 @Component({
-  // tslint:disable-next-line:component-selector
+  // tslint:disable-next-line:component-select§or
   selector: 'ngx-mat-search-field',
   templateUrl: './search-field.component.html',
   styleUrls: ['./search-field.component.css'],
@@ -63,7 +74,7 @@ export class SearchFieldComponent
   @ViewChild(MatAutocompleteTrigger) autocompleteTrigger: MatAutocompleteTrigger;
 
   @Input() name: string;
-  @Input() prefetch = true;
+  @Input() prefetch = 'true';
   _maxRows = 8;
   @Input()
   get maxRows() {
@@ -90,7 +101,7 @@ export class SearchFieldComponent
    */
   readonly autofilled: boolean;
   private _disabled = false;
-  focused = false;
+  // focused = false;
 
   errorState = false;
   controlType = 'app-custom-search-field';
@@ -120,6 +131,19 @@ export class SearchFieldComponent
   get empty(): boolean {
     // return this.lookupValue === '';
     return this.inputRef.nativeElement.value === '';
+  }
+
+  _focused = false;
+  @Input() get focused() {
+    return this._focused;
+  }
+
+  set focused(_focused: boolean) {
+    if (_focused && this.prefetch === 'false') {
+      this.autoCompleteControl.updateValueAndValidity();
+      this.autocompleteScroll(); // https://github.com/angular/components/issues/13650
+    }
+    this._focused = _focused;
   }
 
   /**
@@ -216,9 +240,19 @@ export class SearchFieldComponent
   }
 
   ngOnInit() {
+    this.initializeInputControl();
+  }
 
+  ngOnDestroy() {
+    this.stateChanges.complete();
+  }
+
+  ngAfterViewInit() {}
+
+  initializeInputControl() {
     this.autoCompleteControl.valueChanges
       .pipe(
+        // prePipes,
         startWith(null),
         // delay emits
         debounceTime(300),
@@ -226,6 +260,9 @@ export class SearchFieldComponent
         switchMap(lookup => {
           if (this.value === undefined) {
             this.skipIndex = 0; // clear skipping index
+            if (this.prefetch === 'false' && !this.focused) {
+              return of([]); // return empty set by default
+            }
             return this.getSearchFieldItems();
           } else {
             // if no value is present, return null
@@ -237,12 +274,6 @@ export class SearchFieldComponent
         this.items = fieldItems;
       });
   }
-
-  ngOnDestroy() {
-    this.stateChanges.complete();
-  }
-
-  ngAfterViewInit() {}
 
   optionSelected(event: MatAutocompleteSelectedEvent) {
     const itemId = parseInt(event.option.id, 10);
