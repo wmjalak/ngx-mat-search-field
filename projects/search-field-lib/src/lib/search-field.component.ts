@@ -21,18 +21,11 @@ import {
   ControlValueAccessor,
   NgControl
 } from '@angular/forms';
-import { Observable, of, Subject, fromEvent } from 'rxjs';
-import {
-  startWith,
-  debounceTime,
-  finalize,
-  map,
-  switchMap,
-  takeUntil
-} from 'rxjs/operators';
+import { Observable, of, Subject, fromEvent, empty } from 'rxjs';
+import { startWith, debounceTime, finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 
-import { SearchFieldService } from './search-field.service';
-import { SearchFieldItem } from './search-field-item';
+// import { SearchFieldService } from './search-field.service';
+import { SearchFieldItem, SearchFieldDataSource, SearchFieldResult } from './types';
 import {
   MatAutocomplete,
   MatAutocompleteSelectedEvent,
@@ -72,6 +65,7 @@ export class SearchFieldComponent
   @ViewChild('auto') autocompleteRef: MatAutocomplete;
   @ViewChild(MatAutocompleteTrigger) autocompleteTrigger: MatAutocompleteTrigger;
 
+  @Input() dataSource: SearchFieldDataSource;
   @Input() name: string;
   @Input() prefetch = 'true';
   _maxRows = 8;
@@ -85,6 +79,7 @@ export class SearchFieldComponent
   }
 
   skipIndex = 0;
+  resultCount = 0;
   readOnly = false;
   /**
    * formControl required object: tell the controlGroup, that data is refreshed (so poll it)
@@ -121,7 +116,9 @@ export class SearchFieldComponent
     this._value = val;
     this.readOnly = this._value !== undefined;
     this.stateChanges.next();
-    this._onChange(this._value);
+    if (this._onChange) {
+      this._onChange(this._value);
+    }
   }
 
   /**
@@ -205,7 +202,7 @@ export class SearchFieldComponent
     fb: FormBuilder,
     private fm: FocusMonitor,
     public injector: Injector,
-    private searchFieldService: SearchFieldService,
+    // private searchFieldService: SearchFieldService,
     private elRef: ElementRef<HTMLElement>
   ) {
     fm.monitor(elRef.nativeElement, true).subscribe(origin => {
@@ -229,15 +226,19 @@ export class SearchFieldComponent
 
   setDisabledState(isDisabled: boolean): void {}
 
-  getSearchFieldItems(): Observable<SearchFieldItem[]> {
+  getSearchFieldItems(): Observable<SearchFieldResult> {
     let lookupValue = this.autoCompleteControl.value;
     if (!lookupValue) {
       lookupValue = '';
     }
-    this.isLoading = true;
-    return this.searchFieldService
-      .getSearchFieldItems(this.name, lookupValue, this.maxRows, this.skipIndex * this.maxRows)
-      .pipe(finalize(() => (this.isLoading = false)));
+    if (this.dataSource) {
+      this.isLoading = true;
+      return this.dataSource
+        .search(lookupValue, this.maxRows, this.skipIndex * this.maxRows)
+        .pipe(finalize(() => (this.isLoading = false)));
+    } else {
+      return of(null);
+    }
   }
 
   ngOnInit() {}
@@ -261,6 +262,7 @@ export class SearchFieldComponent
         switchMap(lookup => {
           if (this.value === undefined) {
             this.skipIndex = 0; // clear skipping index
+            this.autocompleteRef._setScrollTop(0); // scroll back to top
             if (this.prefetch === 'false' && !this.focused) {
               return of([]); // return empty set by default
             }
@@ -271,8 +273,8 @@ export class SearchFieldComponent
           }
         })
       )
-      .subscribe((fieldItems: SearchFieldItem[]) => {
-        this.items = fieldItems;
+      .subscribe((result: SearchFieldResult) => {
+        this.handleSearchFieldResult(result);
       });
   }
 
@@ -320,7 +322,7 @@ export class SearchFieldComponent
               const elementHeight = this.autocompleteRef.panel.nativeElement.clientHeight;
               const atBottom = scrollHeight <= scrollTop + elementHeight;
 
-              if (atBottom) {
+              if (atBottom && !this.isLoading /*&& this.items.length < this.resultCount*/) {
                 // reached the bottom
                 this.skipIndex++; // increase skipping index
                 return this.getSearchFieldItems();
@@ -329,12 +331,21 @@ export class SearchFieldComponent
               }
             })
           )
-          .subscribe((fieldItems: SearchFieldItem[]) => {
-            if (fieldItems) {
-              this.items = [...this.items, ...fieldItems]; // add more items to the list
+          .subscribe((result: SearchFieldResult) => {
+            if (result) {
+              this.handleSearchFieldResult(result);
             }
           });
       }
     });
+  }
+
+  handleSearchFieldResult(result: SearchFieldResult) {
+    if (result && result.items /*&& result.items.length > 0*/) {
+      this.items = this.skipIndex === 0 ? result.items : [...this.items, ...result.items];
+      this.resultCount = result.info.count;
+    } else {
+      this.skipIndex = 0;
+    }
   }
 }

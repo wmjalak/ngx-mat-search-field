@@ -5,6 +5,14 @@
   padding-top: 1px
 }
 
+:host ::ng-deep .mat-input-element {
+  text-overflow: ellipsis;
+}
+
+.shrink-size {
+  width: 90%;
+}
+
 .loader {
   border: 3px solid #e6dfdf;
   border-radius: 50%;

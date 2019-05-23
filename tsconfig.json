@@ -21,6 +21,7 @@
     "paths": {
       "ngx-mat-search-field": [
         "projects/search-field-lib/src/public_api.ts" // for development
+        // "dist/search-field-lib/"
 
       ]
     }

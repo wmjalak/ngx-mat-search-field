@@ -5,6 +5,7 @@
   [readonly]="readOnly"
   [formControl]="autoCompleteControl"
   [matAutocomplete]="auto"
+  [class.shrink-size]="value"
 />
 <div *ngIf="value" class="clear-button" (click)="clear()">
   <img
@@ -22,7 +23,7 @@
   <mat-option
     *ngFor="let item of items; let index = index"
     [value]="getTitle(item.title)"
-    [id]="item.id"
+    [id]="item.value"
   >
     <span>{{ getTitle(item.title) }}</span>
     <ng-container *ngIf="hasSecondRow(item.title)">

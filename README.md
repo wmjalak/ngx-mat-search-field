@@ -6,6 +6,77 @@ Angular component providing an input field for searching.
 
 ## Getting started
 
+Install `ngx-mat-search-field` to your project:
+```
+npm install ngx-mat-search-field
+```
+
+Import the `SearchFieldModule` in your `app.module.ts`:
+```typescript
+import { SearchFieldModule } from 'ngx-mat-search-field';
+
+@NgModule({
+  imports: [
+    BrowserAnimationsModule,
+    ReactiveFormsModule,
+    SearchFieldModule
+  ],
+})
+export class AppModule {}
+```
+
+Create the service that implements `SearchFieldService`:
+```typescript
+import { SearchFieldService, SearchFieldItem } from 'ngx-mat-search-field';
+
+@Injectable()
+export class TestService implements SearchFieldService {
+
+  getSearchFieldItems(
+    namespaceIdentifier: string,
+    search: string,
+    size: number,
+    skip: number
+  ): Observable<SearchFieldItem[]> {
+
+    const testData: SearchFieldItem[] = [
+      {
+        id: 1,
+        title: 'Test Item 1'
+      },
+      {
+        id: 2,
+        title: 'Test Item 2'
+      }
+    ];
+
+    const result = testData.filter(
+      item => item.title.toLowerCase().indexOf(search) > -1 || search === ''
+    );
+    return of(result);
+}
+```
+Provide the service `SearchFieldService` in your `app.module.ts`:
+```typescript
+providers: [
+  {
+    provide: SearchFieldService,
+    useClass: TestService
+  }
+]
+```
+
+Use the component in your code:
+
+```html
+<mat-form-field>
+  <ngx-mat-search-field
+    placeholder="Test items">
+  </ngx-mat-search-field>
+</mat-form-field>
+```
+
+
 ## Properties
 
 | Name  | Description |
