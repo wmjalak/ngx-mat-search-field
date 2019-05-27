@@ -4,12 +4,30 @@ Angular component providing an input field for searching.
 
 ## Try it
 
-## Getting started
+Demo running at:
 
-Install `ngx-mat-search-field` to your project:
+https://stackblitz.com/edit/ngx-mat-search-field-demo
+
+## Installation
+
 ```
-npm install ngx-mat-search-field
+npm i ngx-mat-search-field
 ```
+
+## API
+
+`import { SearchFieldModule } from 'ngx-mat-search-field'`<br>
+`selector: ngx-mat-search-field`
+
+### @Inputs()
+
+| Input            | Type    | Required                   | Description                                                                                               |
+| ---------------- | ------- | -------------------------- | --------------------------------------------------------------------------------------------------------- |
+| dataSource           | object  | **YES**                    | the search field's source of data which is provided as a search-function |
+| prefetch     | boolean  | Optional, default: true     | if true, it prefetches the data, if false, the data is fetched when the field gets focused  |
+| maxRows     | number  | Optional, default: 8     | number of items in one fetch  |
+
+## Usage
 
 Import the `SearchFieldModule` in your `app.module.ts`:
 ```typescript
@@ -25,67 +43,41 @@ import { SearchFieldModule } from 'ngx-mat-search-field';
 export class AppModule {}
 ```
 
-Create the service that implements `SearchFieldService`:
+Provide a DataSource that defines the `search` method:
+
 ```typescript
-import { SearchFieldService, SearchFieldItem } from 'ngx-mat-search-field';
+import { SearchFieldDataSource, SearchFieldResult } from 'ngx-mat-search-field';
 
-@Injectable()
-export class TestService implements SearchFieldService {
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html'
+})
+export class AppComponent implements OnInit {
 
-  getSearchFieldItems(
-    namespaceIdentifier: string,
-    search: string,
-    size: number,
-    skip: number
-  ): Observable<SearchFieldItem[]> {
+  searchFieldDataSource: SearchFieldDataSource;
 
-    const testData: SearchFieldItem[] = [
-      {
-        id: 1,
-        title: 'Test Item 1'
-      },
-      {
-        id: 2,
-        title: 'Test Item 2'
+  constructor(private userService: UserService) {
+    this.searchFieldDataSource = {
+      search(search: string, size: number, skip: number): Observable<SearchFieldResult> {
+        return userService.getUsers(search, size, skip);
       }
-    ];
-
-    const result = testData.filter(
-      item => item.title.toLowerCase().indexOf(search) > -1 || search === ''
-    );
-    return of(result);
+    };
+  }
 }
 ```
-Provide the service `SearchFieldService` in your `app.module.ts`:
-```typescript
-providers: [
-  {
-    provide: SearchFieldService,
-    useClass: TestService
-  }
-]
-```
 
-Use the component in your code:
+Use it in your component:
 
 ```html
 <mat-form-field>
   <ngx-mat-search-field
-    placeholder="Test items">
-  </ngx-mat-search-field>
+    [dataSource]="searchFieldDataSource"
+    placeholder="User"
+  ></ngx-mat-search-field>
 </mat-form-field>
 ```
 
-
-## Properties
-
-| Name  | Description |
-| :---- | :---------- |
-| `prefetch` | When `true` the data is prefetched. When `false` the data is fetched when field gets focused. |
-
 ## Development
-
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.7.1.
 
 ### Development server
 
