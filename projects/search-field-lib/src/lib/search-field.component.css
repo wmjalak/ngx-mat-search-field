@@ -10,7 +10,7 @@
 }
 
 .shrink-size {
-  width: 90%;
+  width: 85%;
 }
 
 .loader {
@@ -51,13 +51,5 @@
   right: 0px;
   bottom: 1px;
   cursor: pointer;
-  opacity: 0.75;
-}
-
-.clear-button:hover {
-  opacity: 1;
-}
-
-.clear-button.img {
-  width: 18px;
+  opacity: 0.8;
 }

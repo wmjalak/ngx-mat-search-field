@@ -8,7 +8,7 @@
   [class.shrink-size]="value"
 />
 <div *ngIf="value" class="clear-button" (click)="clear()">
-  <mat-icon svgIcon="close" class="mat-primary"></mat-icon>
+  <mat-icon svgIcon="close" [class.mat-primary]="focused"></mat-icon>
 </div>
 <div *ngIf="isLoading" class="loader"></div>
 
