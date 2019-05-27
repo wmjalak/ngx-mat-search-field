@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { SearchFieldDataSource, SearchFieldResult } from 'ngx-mat-search-field';
 
-import { ComicService } from './comic.service';
+import { UserService } from './user.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -15,10 +15,15 @@ export class AppComponent {
 
   dataSource: SearchFieldDataSource;
 
-  constructor(formBuilder: FormBuilder, private comicService: ComicService) {
-    this.form = formBuilder.group({
-      user1: '',
-      user2: ''
+  formControl1: FormControl;
+
+  constructor(formBuilder: FormBuilder, private userService: UserService) {
+
+    this.formControl1 = new FormControl({ value: '', disabled: false }, Validators.required);
+
+    this.form = new FormGroup({
+      user1: this.formControl1,
+      user2: new FormControl('', Validators.required)
     });
 
     this.form.valueChanges.subscribe(item => {
@@ -27,8 +32,13 @@ export class AppComponent {
 
     this.dataSource = {
       search(search: string, size: number, skip: number): Observable<SearchFieldResult> {
-        return comicService.getCharacters(search, size, skip);
+        return userService.getCharacters(search, size, skip);
       }
     };
+
+    setTimeout(() => {
+      // this.formControl1.enable();
+    }, 2000);
+
   }
 }

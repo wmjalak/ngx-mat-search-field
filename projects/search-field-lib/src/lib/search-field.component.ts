@@ -14,6 +14,8 @@ import {
   Optional,
   Self
 } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { MatIconRegistry } from '@angular/material';
 import {
   FormBuilder,
   FormControl,
@@ -65,7 +67,18 @@ export class SearchFieldComponent
   @ViewChild('auto') autocompleteRef: MatAutocomplete;
   @ViewChild(MatAutocompleteTrigger) autocompleteTrigger: MatAutocompleteTrigger;
 
-  @Input() dataSource: SearchFieldDataSource;
+  _dataSource: SearchFieldDataSource;
+  @Input()
+  get dataSource(): SearchFieldDataSource {
+    return this._dataSource;
+  }
+  set dataSource(val: SearchFieldDataSource) {
+    if (!this._dataSource) {
+      console.log('set datasource, currently undefined');
+    }
+    this._dataSource = val;
+  }
+
   @Input() name: string;
   @Input() prefetch = 'true';
   _maxRows = 8;
@@ -88,7 +101,7 @@ export class SearchFieldComponent
 
   @HostBinding() id = `app-custom-search-field-${SearchFieldComponent.nextId}`;
 
-  _value: number;
+  _value: any;
 
   /**
    * MatFormField (required) self-explaining attributes
@@ -109,10 +122,10 @@ export class SearchFieldComponent
    * we need to implement stateChanges (Material) and call the formControl callback on change as well.
    */
   @Input()
-  get value(): number {
+  get value(): any {
     return this._value;
   }
-  set value(val: number) {
+  set value(val: any) {
     this._value = val;
     this.readOnly = this._value !== undefined;
     this.stateChanges.next();
@@ -165,8 +178,9 @@ export class SearchFieldComponent
   get disabled() {
     return this._disabled;
   }
-  set disabled(dis) {
+  set disabled(dis: boolean) {
     this._disabled = coerceBooleanProperty(dis);
+    this._disabled ? this.autoCompleteControl.disable() : this.autoCompleteControl.enable();
     this.stateChanges.next();
   }
 
@@ -202,8 +216,9 @@ export class SearchFieldComponent
     fb: FormBuilder,
     private fm: FocusMonitor,
     public injector: Injector,
-    // private searchFieldService: SearchFieldService,
-    private elRef: ElementRef<HTMLElement>
+    private elRef: ElementRef<HTMLElement>,
+    iconRegistry: MatIconRegistry,
+    sanitizer: DomSanitizer
   ) {
     fm.monitor(elRef.nativeElement, true).subscribe(origin => {
       this.focused = !!origin;
@@ -215,6 +230,16 @@ export class SearchFieldComponent
     if (this.ngControl != null) {
       this.ngControl.valueAccessor = this;
     }
+
+    iconRegistry.addSvgIconLiteral(
+      'close',
+      sanitizer.bypassSecurityTrustHtml(`
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+<path d="M0 0h24v24H0z" fill="none"/>
+</svg>
+      `)
+    );
   }
 
   writeValue(obj: any): void {}
@@ -224,7 +249,10 @@ export class SearchFieldComponent
   }
   registerOnTouched(fn: () => void): void {}
 
-  setDisabledState(isDisabled: boolean): void {}
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+    isDisabled ? this.autoCompleteControl.disable() : this.autoCompleteControl.enable();
+  }
 
   getSearchFieldItems(): Observable<SearchFieldResult> {
     let lookupValue = this.autoCompleteControl.value;
@@ -263,7 +291,7 @@ export class SearchFieldComponent
           if (this.value === undefined) {
             this.skipIndex = 0; // clear skipping index
             this.autocompleteRef._setScrollTop(0); // scroll back to top
-            if (this.prefetch === 'false' && !this.focused) {
+            if ((this.prefetch === 'false' && !this.focused) || this._disabled) {
               return of([]); // return empty set by default
             }
             return this.getSearchFieldItems();
@@ -279,12 +307,7 @@ export class SearchFieldComponent
   }
 
   optionSelected(event: MatAutocompleteSelectedEvent) {
-    const itemId = parseInt(event.option.id, 10);
-    if (itemId === -1) {
-      this.focused = false;
-      return;
-    }
-    this.value = itemId;
+    this.value = event.option.id;
   }
 
   getTitle(value: string): string {

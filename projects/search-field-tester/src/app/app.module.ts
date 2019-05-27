@@ -5,7 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material';
 
 import { AppComponent } from './app.component';
-import { ComicService } from './comic.service';
+import { UserService } from './user.service';
 import { SearchFieldModule } from 'ngx-mat-search-field';
 
 @NgModule({
@@ -19,7 +19,7 @@ import { SearchFieldModule } from 'ngx-mat-search-field';
     SearchFieldModule
   ],
   providers: [
-    ComicService
+    UserService
   ],
   bootstrap: [AppComponent]
 })

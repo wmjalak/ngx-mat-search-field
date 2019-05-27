@@ -2,7 +2,7 @@
   "name": "ngx-mat-search-field",
   "description": "Angular component providing an async autocomplete input-field for searching",
   "author": "Jani Laakso",
-  "version": "0.1.2",
+  "version": "0.1.5",
   "license": "MIT",
   "homepage": "https://github.com/wmjalak/ngx-mat-search-field",
   "repository": {

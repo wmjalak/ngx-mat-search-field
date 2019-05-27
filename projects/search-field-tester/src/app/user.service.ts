@@ -5,7 +5,7 @@ import { map, catchError } from 'rxjs/operators';
 import { SearchFieldResult } from 'ngx-mat-search-field';
 
 @Injectable()
-export class ComicService {
+export class UserService {
   constructor(private http: HttpClient) {}
 
   getCharacters(search: string, size: number, skip: number): Observable<SearchFieldResult> {
