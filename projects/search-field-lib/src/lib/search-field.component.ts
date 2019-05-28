@@ -73,9 +73,6 @@ export class SearchFieldComponent
     return this._dataSource;
   }
   set dataSource(val: SearchFieldDataSource) {
-    if (!this._dataSource) {
-      console.log('set datasource, currently undefined');
-    }
     this._dataSource = val;
   }
 
