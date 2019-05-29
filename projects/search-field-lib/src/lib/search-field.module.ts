@@ -5,14 +5,12 @@ import { MatInputModule } from '@angular/material';
 import { MatIconModule } from '@angular/material';
 import { MatFormFieldControl } from '@angular/material';
 import { ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 
 import { SearchFieldComponent } from './search-field.component';
 
 @NgModule({
   imports: [
     CommonModule,
-    HttpClientModule,
     MatAutocompleteModule,
     MatIconModule,
     MatInputModule,

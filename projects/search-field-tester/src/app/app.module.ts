@@ -1,6 +1,7 @@
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 import { MatFormFieldModule } from '@angular/material';
 
@@ -14,6 +15,7 @@ import { SearchFieldModule } from 'ngx-mat-search-field';
   ],
   imports: [
     BrowserAnimationsModule,
+    HttpClientModule,
     MatFormFieldModule,
     ReactiveFormsModule,
     SearchFieldModule
