@@ -1,8 +1,5 @@
 .mat-option {
-  height: 50px;
   line-height: 20px;
-  padding-bottom: 1px;
-  padding-top: 1px
 }
 
 :host ::ng-deep .mat-input-element {

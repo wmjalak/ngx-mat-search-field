@@ -23,10 +23,15 @@ import {
   ControlValueAccessor,
   NgControl
 } from '@angular/forms';
-import { Observable, of, Subject, fromEvent, empty } from 'rxjs';
-import { startWith, debounceTime, finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { Observable, of, Subject, fromEvent } from 'rxjs';
+import {
+  startWith,
+  debounceTime,
+  finalize,
+  switchMap,
+  takeUntil,
+} from 'rxjs/operators';
 
-// import { SearchFieldService } from './search-field.service';
 import { SearchFieldItem, SearchFieldDataSource, SearchFieldResult } from './types';
 import {
   MatAutocomplete,
@@ -78,7 +83,7 @@ export class SearchFieldComponent
 
   @Input() name: string;
   @Input() prefetch = 'true';
-  _maxRows = 8;
+  private _maxRows = 8;
   @Input()
   get maxRows() {
     return this._maxRows;
@@ -146,7 +151,7 @@ export class SearchFieldComponent
 
   set focused(_focused: boolean) {
     if (_focused) {
-      if (this.prefetch === 'false') {
+      if (!this.isPrefetch()) {
         this.autoCompleteControl.updateValueAndValidity();
       }
       this.autocompleteScroll(); // https://github.com/angular/components/issues/13650
@@ -237,9 +242,16 @@ export class SearchFieldComponent
 </svg>
       `)
     );
+    this.initializeInputControl();
   }
 
-  writeValue(obj: any): void {}
+  writeValue(obj: any): void {
+    if (obj === undefined) {
+      this.clear();
+    } else if (obj !== '') {
+      this.value = obj;
+    }
+  }
 
   registerOnChange(fn: (v: any) => void): void {
     this._onChange = fn;
@@ -251,7 +263,7 @@ export class SearchFieldComponent
     isDisabled ? this.autoCompleteControl.disable() : this.autoCompleteControl.enable();
   }
 
-  getSearchFieldItems(): Observable<SearchFieldResult> {
+  getSearchFieldItems(skipIndex: number = 0): Observable<SearchFieldResult> {
     let lookupValue = this.autoCompleteControl.value;
     if (!lookupValue) {
       lookupValue = '';
@@ -259,7 +271,7 @@ export class SearchFieldComponent
     if (this.dataSource) {
       this.isLoading = true;
       return this.dataSource
-        .search(lookupValue, this.maxRows, this.skipIndex * this.maxRows)
+        .search(lookupValue, this.maxRows, skipIndex * this.maxRows)
         .pipe(finalize(() => (this.isLoading = false)));
     } else {
       return of(null);
@@ -272,9 +284,7 @@ export class SearchFieldComponent
     this.stateChanges.complete();
   }
 
-  ngAfterViewInit() {
-    this.initializeInputControl();
-  }
+  ngAfterViewInit() {}
 
   initializeInputControl() {
     this.autoCompleteControl.valueChanges
@@ -288,12 +298,14 @@ export class SearchFieldComponent
           if (this.value === undefined) {
             this.skipIndex = 0; // clear skipping index
             this.autocompleteRef._setScrollTop(0); // scroll back to top
-            if ((this.prefetch === 'false' && !this.focused) || this._disabled) {
+            if ((!this.isPrefetch() && !this.focused) || this._disabled) {
               return of([]); // return empty set by default
             }
-            return this.getSearchFieldItems();
+            return !this.hasItemsInList() || lookup !== undefined
+              ? this.getSearchFieldItems()
+              : of(null);
           } else {
-            // if no value is present, return null
+            // if value is present, return null
             return of(null);
           }
         })
@@ -319,14 +331,26 @@ export class SearchFieldComponent
     return value ? value.split('|').length > 0 : false;
   }
 
+  private hasItemsInList(): boolean {
+    return this.items.length > 0;
+  }
+
+  private isPrefetch(): boolean {
+    return this.prefetch ? this.prefetch !== 'false' : true;
+  }
+
   getSecondRow(value: string): string {
     return this.hasSecondRow(value) ? value.split('|')[1] : undefined;
   }
 
   clear() {
     this.value = undefined;
-    this.autoCompleteControl.setValue('');
-    this.inputRef.nativeElement.value = '';
+    this.autoCompleteControl.setValue(undefined);
+    this.items = [];
+    if (this.inputRef) {
+      this.inputRef.nativeElement.value = '';
+      this.inputRef.nativeElement.blur();
+    }
   }
 
   autocompleteScroll() {
@@ -334,18 +358,21 @@ export class SearchFieldComponent
       if (this.autocompleteRef && this.autocompleteTrigger && this.autocompleteRef.panel) {
         fromEvent(this.autocompleteRef.panel.nativeElement, 'scroll')
           .pipe(
-            map(x => this.autocompleteRef.panel.nativeElement.scrollTop),
-            takeUntil(this.autocompleteTrigger.panelClosingActions),
-            switchMap((x: number) => {
-              const scrollTop = this.autocompleteRef.panel.nativeElement.scrollTop;
-              const scrollHeight = this.autocompleteRef.panel.nativeElement.scrollHeight;
-              const elementHeight = this.autocompleteRef.panel.nativeElement.clientHeight;
-              const atBottom = scrollHeight <= scrollTop + elementHeight;
+            takeUntil(this.autocompleteTrigger.panelClosingActions), // observe until closed
+            debounceTime(200),
+            switchMap(() => {
 
-              if (atBottom && !this.isLoading /*&& this.items.length < this.resultCount*/) {
-                // reached the bottom
+              const scrollTop = this.autocompleteRef.panel.nativeElement.scrollTop;
+              const elementHeight = this.autocompleteRef.panel.nativeElement.clientHeight; // fixed value, normally 256
+              const scrollHeight = this.autocompleteRef.panel.nativeElement.scrollHeight;
+
+              const atBottom = (scrollHeight) <= (scrollTop + elementHeight);
+              if (
+                atBottom &&
+                !this.isLoading && scrollTop !== 0
+              ) {
                 this.skipIndex++; // increase skipping index
-                return this.getSearchFieldItems();
+                return this.getSearchFieldItems(this.skipIndex);
               } else {
                 return of(undefined);
               }
@@ -361,7 +388,7 @@ export class SearchFieldComponent
   }
 
   handleSearchFieldResult(result: SearchFieldResult) {
-    if (result && result.items /*&& result.items.length > 0*/) {
+    if (result && result.items) {
       this.items = this.skipIndex === 0 ? result.items : [...this.items, ...result.items];
       this.resultCount = result.info.count;
     } else {
