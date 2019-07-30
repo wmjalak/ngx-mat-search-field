@@ -13,9 +13,10 @@
 
     <mat-form-field>
       <ngx-mat-search-field
-        placeholder="User (prefetch=false)"
+        placeholder="Users (prefetch=false)"
         formControlName="user2"
         prefetch="false"
+        mode="chip"
         [maxRows]="20"
         [dataSource]="dataSource"
       ></ngx-mat-search-field>

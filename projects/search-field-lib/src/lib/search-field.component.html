@@ -1,22 +1,48 @@
-<input
-  type="text"
-  matInput
-  #input
-  [readonly]="readOnly"
-  [formControl]="autoCompleteControl"
-  [matAutocomplete]="auto"
-  [class.shrink-size]="value"
-/>
-<div *ngIf="value" class="clear-button" (click)="clear()">
-  <mat-icon svgIcon="close" [class.mat-primary]="focused"></mat-icon>
+<div *ngIf="isSinglePickMode(); else chipMode">
+  <input
+    type="text"
+    matInput
+    #input
+    [readonly]="readOnly"
+    [formControl]="autoCompleteControl"
+    [matAutocomplete]="auto"
+    [class.shrink-size]="value"
+  />
+  <div *ngIf="value" class="clear-button" (click)="clear()">
+    <mat-icon svgIcon="close" [class.mat-primary]="focused"></mat-icon>
+  </div>
+  <div *ngIf="isLoading" class="loader"></div>
 </div>
-<div *ngIf="isLoading" class="loader"></div>
+
+<ng-template #chipMode>
+  <mat-chip-list #chipList aria-label="selection">
+    <mat-chip *ngFor="let item of value" [selectable]="true"
+    [removable]="true"
+    (removed)="remove(item.value)">
+      {{ getTitle(item.title) }}
+      <!--
+      <div class="clear-button" (click)="remove(item.value)">
+        <mat-icon svgIcon="close" [class.mat-primary]="focused"></mat-icon>
+      </div>
+      -->
+    <mat-icon matChipRemove svgIcon="close"></mat-icon>
+    </mat-chip>
+    <input
+      type="text"
+      matInput
+      #input
+      [readonly]="readOnly"
+      [formControl]="autoCompleteControl"
+      [matAutocomplete]="auto"
+      [matChipInputFor]="chipList"
+    />
+  </mat-chip-list>
+</ng-template>
 
 <mat-autocomplete
   autoActiveFirstOption
   #auto="matAutocomplete"
   (optionSelected)="optionSelected($event)"
-
 >
   <mat-option
     *ngFor="let item of items; let index = index"

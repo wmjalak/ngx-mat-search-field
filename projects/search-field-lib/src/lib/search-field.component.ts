@@ -24,13 +24,8 @@ import {
   NgControl
 } from '@angular/forms';
 import { Observable, of, Subject, fromEvent } from 'rxjs';
-import {
-  startWith,
-  debounceTime,
-  finalize,
-  switchMap,
-  takeUntil,
-} from 'rxjs/operators';
+import { startWith, debounceTime, finalize, switchMap, takeUntil } from 'rxjs/operators';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
 
 import { SearchFieldItem, SearchFieldDataSource, SearchFieldResult } from './types';
 import {
@@ -39,6 +34,7 @@ import {
   MatAutocompleteTrigger
 } from '@angular/material/autocomplete';
 import { MatFormFieldControl } from '@angular/material';
+import { MatChipInputEvent } from '@angular/material/chips';
 
 @Component({
   // tslint:disable-next-line:component-select§or
@@ -84,6 +80,7 @@ export class SearchFieldComponent
   @Input() name: string;
   @Input() prefetch = 'true';
   private _maxRows = 8;
+  @Input() mode = 'single';
   @Input()
   get maxRows() {
     return this._maxRows;
@@ -129,7 +126,9 @@ export class SearchFieldComponent
   }
   set value(val: any) {
     this._value = val;
-    this.readOnly = this._value !== undefined;
+    if (this.isSinglePickMode()) {
+      this.readOnly = this._value !== undefined;
+    }
     this.stateChanges.next();
     if (this._onChange) {
       this._onChange(this._value);
@@ -140,8 +139,13 @@ export class SearchFieldComponent
    * Return empty for Material
    */
   get empty(): boolean {
-    // return this.lookupValue === '';
-    return this.inputRef.nativeElement.value === '';
+    return !this.isSinglePickMode()
+      ? this.value === undefined
+      : this.inputRef
+      ? this.inputRef.nativeElement.value === ''
+      : !this.isSinglePickMode
+      ? this.value !== undefined
+          : true;
   }
 
   _focused = false;
@@ -263,6 +267,38 @@ export class SearchFieldComponent
     isDisabled ? this.autoCompleteControl.disable() : this.autoCompleteControl.enable();
   }
 
+  isSinglePickMode(): boolean {
+    return this.mode === 'single';
+  }
+
+  add(event: MatChipInputEvent): void {
+    // Add fruit only when MatAutocomplete is not open
+    // To make sure this does not conflict with OptionSelected Event
+    if (!this.autocompleteRef.isOpen) {
+      const input = event.input;
+      const value = event.value;
+
+      // Add our fruit
+      if ((value || '').trim()) {
+        // this.fruits.push(value.trim());
+      }
+
+      // Reset the input value
+      if (input) {
+        input.value = '';
+      }
+
+      this.autoCompleteControl.setValue(null);
+    }
+  }
+
+  remove(itemValue: any): void {
+    // selectedItems: SearchFieldItem[] = [];
+    // const a: SearchFieldItem[] = [];
+    // this.value = a;
+    this.value = this.value.filter((item: SearchFieldItem) => item.value !== itemValue);
+  }
+
   getSearchFieldItems(skipIndex: number = 0): Observable<SearchFieldResult> {
     let lookupValue = this.autoCompleteControl.value;
     if (!lookupValue) {
@@ -295,7 +331,7 @@ export class SearchFieldComponent
         debounceTime(300),
         // use switch map so as to cancel previous subscribed events, before creating new once
         switchMap(lookup => {
-          if (this.value === undefined) {
+          if ((this.isSinglePickMode() && this.value === undefined) || !this.isSinglePickMode()) {
             this.skipIndex = 0; // clear skipping index
             this.autocompleteRef._setScrollTop(0); // scroll back to top
             if ((!this.isPrefetch() && !this.focused) || this._disabled) {
@@ -316,7 +352,29 @@ export class SearchFieldComponent
   }
 
   optionSelected(event: MatAutocompleteSelectedEvent) {
-    this.value = event.option.id;
+    if (this.isSinglePickMode()) {
+      this.value = event.option.id;
+    } else {
+      const a: SearchFieldItem[] = [];
+      // a.push(this.value);
+
+      if (this.value) {
+        a.push(this.value);
+        // const a: SearchFieldItem[] = [];
+        // this.value = a;
+      }
+
+      // this.value = ['jani'];
+
+      a.push({
+        title: event.option.value,
+        value: event.option.id
+      });
+      this.value = a;
+
+      this.inputRef.nativeElement.value = '';
+      this.autoCompleteControl.setValue(undefined);
+    }
   }
 
   getTitle(value: string): string {
@@ -344,13 +402,13 @@ export class SearchFieldComponent
   }
 
   clear() {
-    this.value = undefined;
-    this.autoCompleteControl.setValue(undefined);
     this.items = [];
     if (this.inputRef) {
       this.inputRef.nativeElement.value = '';
       this.inputRef.nativeElement.blur();
     }
+    this.value = undefined;
+    this.autoCompleteControl.setValue(undefined);
   }
 
   autocompleteScroll() {
@@ -361,16 +419,12 @@ export class SearchFieldComponent
             takeUntil(this.autocompleteTrigger.panelClosingActions), // observe until closed
             debounceTime(200),
             switchMap(() => {
-
               const scrollTop = this.autocompleteRef.panel.nativeElement.scrollTop;
               const elementHeight = this.autocompleteRef.panel.nativeElement.clientHeight; // fixed value, normally 256
               const scrollHeight = this.autocompleteRef.panel.nativeElement.scrollHeight;
 
-              const atBottom = (scrollHeight) <= (scrollTop + elementHeight);
-              if (
-                atBottom &&
-                !this.isLoading && scrollTop !== 0
-              ) {
+              const atBottom = scrollHeight <= scrollTop + elementHeight;
+              if (atBottom && !this.isLoading && scrollTop !== 0) {
                 this.skipIndex++; // increase skipping index
                 return this.getSearchFieldItems(this.skipIndex);
               } else {
