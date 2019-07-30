@@ -344,13 +344,13 @@ export class SearchFieldComponent
   }
 
   clear() {
-    this.value = undefined;
-    this.autoCompleteControl.setValue(undefined);
     this.items = [];
     if (this.inputRef) {
       this.inputRef.nativeElement.value = '';
       this.inputRef.nativeElement.blur();
     }
+    this.value = undefined;
+    this.autoCompleteControl.setValue(undefined);
   }
 
   autocompleteScroll() {
@@ -366,11 +366,8 @@ export class SearchFieldComponent
               const elementHeight = this.autocompleteRef.panel.nativeElement.clientHeight; // fixed value, normally 256
               const scrollHeight = this.autocompleteRef.panel.nativeElement.scrollHeight;
 
-              const atBottom = (scrollHeight) <= (scrollTop + elementHeight);
-              if (
-                atBottom &&
-                !this.isLoading && scrollTop !== 0
-              ) {
+              const atBottom = scrollHeight <= scrollTop + elementHeight;
+              if (atBottom && !this.isLoading && scrollTop !== 0) {
                 this.skipIndex++; // increase skipping index
                 return this.getSearchFieldItems(this.skipIndex);
               } else {

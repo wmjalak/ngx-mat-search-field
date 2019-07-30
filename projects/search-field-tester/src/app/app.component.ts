@@ -19,7 +19,7 @@ export class AppComponent {
 
   constructor(formBuilder: FormBuilder, private userService: UserService) {
 
-    this.formControl1 = new FormControl({ value: '', disabled: false }, Validators.required);
+    this.formControl1 = new FormControl({ value: undefined, disabled: false }, Validators.required);
 
     this.form = new FormGroup({
       user1: this.formControl1,
