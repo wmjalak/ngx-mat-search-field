@@ -68,9 +68,9 @@ export class SearchFieldComponent
   stateChanges = new Subject<void>();
 
   // @ViewChild('input') inputField: MatInput;
-  @ViewChild('input') inputRef: ElementRef;
-  @ViewChild('auto') autocompleteRef: MatAutocomplete;
-  @ViewChild(MatAutocompleteTrigger) autocompleteTrigger: MatAutocompleteTrigger;
+  @ViewChild('input', {static: false}) inputRef!: ElementRef;
+  @ViewChild('auto', {static: false}) autocompleteRef!: MatAutocomplete;
+  @ViewChild(MatAutocompleteTrigger, {static: false}) autocompleteTrigger!: MatAutocompleteTrigger;
 
   _dataSource: SearchFieldDataSource;
   @Input()
@@ -140,8 +140,7 @@ export class SearchFieldComponent
    * Return empty for Material
    */
   get empty(): boolean {
-    // return this.lookupValue === '';
-    return this.inputRef.nativeElement.value === '';
+    return this.inputRef ? this.inputRef.nativeElement.value === '' : true;
   }
 
   _focused = false;
