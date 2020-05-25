@@ -15,7 +15,7 @@ import {
   Self
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { MatIconRegistry } from '@angular/material';
+import { MatIconRegistry } from '@angular/material/icon';
 import {
   FormBuilder,
   FormControl,
@@ -38,7 +38,7 @@ import {
   MatAutocompleteSelectedEvent,
   MatAutocompleteTrigger
 } from '@angular/material/autocomplete';
-import { MatFormFieldControl } from '@angular/material';
+import { MatFormFieldControl } from '@angular/material/form-field';
 
 @Component({
   // tslint:disable-next-line:component-select§or
@@ -68,9 +68,9 @@ export class SearchFieldComponent
   stateChanges = new Subject<void>();
 
   // @ViewChild('input') inputField: MatInput;
-  @ViewChild('input', {static: false}) inputRef!: ElementRef;
-  @ViewChild('auto', {static: false}) autocompleteRef!: MatAutocomplete;
-  @ViewChild(MatAutocompleteTrigger, {static: false}) autocompleteTrigger!: MatAutocompleteTrigger;
+  @ViewChild('input') inputRef!: ElementRef;
+  @ViewChild('auto') autocompleteRef!: MatAutocomplete;
+  @ViewChild(MatAutocompleteTrigger) autocompleteTrigger!: MatAutocompleteTrigger;
 
   _dataSource: SearchFieldDataSource;
   @Input()

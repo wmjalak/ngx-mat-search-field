@@ -5,7 +5,7 @@ ngx-mat-search-field
 [![npm](https://img.shields.io/npm/dm/ngx-mat-search-field.svg)](https://www.npmjs.com/package/ngx-mat-search-field)
 
 
-Angular (7/8) component providing an input field for searching.
+Angular 9 component providing an input field for searching.
 
 ## Try it
 

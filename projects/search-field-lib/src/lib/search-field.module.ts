@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatInputModule } from '@angular/material';
-import { MatIconModule } from '@angular/material';
-import { MatFormFieldControl } from '@angular/material';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldControl } from '@angular/material/form-field';
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { SearchFieldComponent } from './search-field.component';
