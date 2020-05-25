@@ -3,16 +3,12 @@ import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import {
   Component,
   forwardRef,
-  OnInit,
   OnDestroy,
-  AfterViewInit,
   Injector,
   Input,
   HostBinding,
   ElementRef,
   ViewChild,
-  Optional,
-  Self
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatIconRegistry } from '@angular/material/icon';
@@ -21,22 +17,16 @@ import {
   FormControl,
   NG_VALUE_ACCESSOR,
   ControlValueAccessor,
-  NgControl
+  NgControl,
 } from '@angular/forms';
 import { Observable, of, Subject, fromEvent } from 'rxjs';
-import {
-  startWith,
-  debounceTime,
-  finalize,
-  switchMap,
-  takeUntil,
-} from 'rxjs/operators';
+import { startWith, debounceTime, finalize, switchMap, takeUntil } from 'rxjs/operators';
 
 import { SearchFieldItem, SearchFieldDataSource, SearchFieldResult } from './types';
 import {
   MatAutocomplete,
   MatAutocompleteSelectedEvent,
-  MatAutocompleteTrigger
+  MatAutocompleteTrigger,
 } from '@angular/material/autocomplete';
 import { MatFormFieldControl } from '@angular/material/form-field';
 
@@ -50,16 +40,16 @@ import { MatFormFieldControl } from '@angular/material/form-field';
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => SearchFieldComponent),
-      multi: true
+      multi: true,
     },
     {
       provide: MatFormFieldControl,
-      useExisting: SearchFieldComponent
-    }
-  ]
+      useExisting: SearchFieldComponent,
+    },
+  ],
 })
 export class SearchFieldComponent
-  implements ControlValueAccessor, MatFormFieldControl<number>, OnInit, OnDestroy, AfterViewInit {
+  implements ControlValueAccessor, MatFormFieldControl<number>, OnDestroy {
   static nextId = 0;
 
   /**
@@ -70,7 +60,8 @@ export class SearchFieldComponent
   // @ViewChild('input') inputField: MatInput;
   @ViewChild('input') inputRef!: ElementRef;
   @ViewChild('auto') autocompleteRef!: MatAutocomplete;
-  @ViewChild(MatAutocompleteTrigger) autocompleteTrigger!: MatAutocompleteTrigger;
+  @ViewChild(MatAutocompleteTrigger)
+  autocompleteTrigger!: MatAutocompleteTrigger;
 
   _dataSource: SearchFieldDataSource;
   @Input()
@@ -221,7 +212,7 @@ export class SearchFieldComponent
     iconRegistry: MatIconRegistry,
     sanitizer: DomSanitizer
   ) {
-    fm.monitor(elRef.nativeElement, true).subscribe(origin => {
+    fm.monitor(elRef.nativeElement, true).subscribe((origin) => {
       this.focused = !!origin;
       this.stateChanges.next();
     });
@@ -277,13 +268,9 @@ export class SearchFieldComponent
     }
   }
 
-  ngOnInit() {}
-
   ngOnDestroy() {
     this.stateChanges.complete();
   }
-
-  ngAfterViewInit() {}
 
   initializeInputControl() {
     this.autoCompleteControl.valueChanges
@@ -293,7 +280,7 @@ export class SearchFieldComponent
         // delay emits
         debounceTime(300),
         // use switch map so as to cancel previous subscribed events, before creating new once
-        switchMap(lookup => {
+        switchMap((lookup) => {
           if (this.value === undefined) {
             this.skipIndex = 0; // clear skipping index
             this.autocompleteRef._setScrollTop(0); // scroll back to top
@@ -360,7 +347,6 @@ export class SearchFieldComponent
             takeUntil(this.autocompleteTrigger.panelClosingActions), // observe until closed
             debounceTime(200),
             switchMap(() => {
-
               const scrollTop = this.autocompleteRef.panel.nativeElement.scrollTop;
               const elementHeight = this.autocompleteRef.panel.nativeElement.clientHeight; // fixed value, normally 256
               const scrollHeight = this.autocompleteRef.panel.nativeElement.scrollHeight;

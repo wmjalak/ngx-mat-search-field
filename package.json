@@ -8,9 +8,10 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "build-lib": "ng build search-field-lib",
+    "build-lib": "ng build search-field-lib --prod",
+    "copy-readme": "cp .\\README.md .\\dist\\search-field-lib",
     "npm-pack": "cd dist/search-field-lib && npm pack",
-    "publish": "npm run build-lib && cd dist/search-field-lib && npm publish",
+    "publish": "npm run build-lib && npm run copy-readme && cd dist/search-field-lib && npm publish",
     "package": "npm run build-lib && npm run npm-pack"
   },
   "private": true,
